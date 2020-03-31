@@ -186,3 +186,61 @@ $ net start MyServiceName
 $ net stop MyServiceName
 ```
 
+## Apache Tomcat clustering-Apache Http Server as load balancer
+
+### Config
+
+#### Apache Http Server
+
+- Download [mod_jk](http://archive.apache.org/dist/tomcat/tomcat-connectors/jk/binaries/windows/tomcat-connectors-1.2.39-windows-x86_64-httpd-2.4.x.zip) and add it to yourowndirectory\Apache24\modules folder
+- Add wrokers.properties to yourowndirectory\Apache24\conf folder and set tomcat workers
+
+```
+# wrokers.properties setting
+worker.list=balancer,stat
+
+worker.tomcat1.type=ajp13
+worker.tomcat1.host=host1
+worker.tomcat1.port=8009
+worker.tomcat1.retries=1
+
+worker.tomcat2.type=ajp13
+worker.tomcat2.host=host2
+worker.tomcat2.port=8009
+worker.tomcat2.retries=1
+
+worker.balancer.type=lb
+worker.balancer.balance_workers=tomcat1,tomcat2
+
+worker.stat.type=status
+```
+
+- Config yourowndirectory\Apache24\conf\httpd.conf adding mod_jk settings
+
+```
+# add these settings to the end of httpd.conf
+LoadModule    jk_module  modules/mod_jk.so
+JkWorkersFile conf/workers.properties
+JkLogFile     logs/mod_jk.log
+JkLogLevel    emerg
+JkLogStampFormat "[%Y-%m-%d %H:%M:%S.%Q] "
+JkRequestLogFormat     "%m %U %w %R %T"
+JkOptions     +ForwardKeySize +ForwardURICompat -ForwardDirectories
+
+JkMount  /jk-status  stat
+JkMount  /*  balancer
+```
+
+#### Apache Tomcat Server
+
+- Config D:\Tomcat9\conf\server.xml adding AJP connector and jvmRoute attribute
+
+```
+# add this tag under <Service name="Catalina"> tag
+<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+
+# add jvmRoute attribute to <Engine name="Catalina" defaultHost="localhost"> tag
+# jvmRoute attribute value depend on which worker that it is
+<Engine name="Catalina" defaultHost="localhost" jvmRoute="tomcat1">
+```
+
