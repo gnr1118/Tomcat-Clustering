@@ -1,4 +1,4 @@
-# Tomcat clustering on Windows-Apache Http Server as load balancer 
+Tomcat clustering on Windows-Apache Http Server as load balancer 
 
 There are three main steps for Tomcat clustering on Windows:
 
@@ -118,4 +118,71 @@ $ net stop MyServiceName
 ```
 
 ## Apache Tomcat install & config
+
+### prerequisite
+
+- you need to install the JDK in your machine, and add environment variables such like JAVA_HOME,  CLASSPATH and Path, check [this website](https://caterpillar.gitbooks.io/javase6tutorial/content/c2.html)
+
+### Install
+
+- Download [Tomcat Version 9.0.21](https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.21/bin/apache-tomcat-9.0.21-windows-x64.zip) 
+- Unzip the file and put the directory whereever you want, suggesting put the directory under D:\ and rename the directory to Tomcat9
+- Set CATALINA_HOME environment variable to D:\Tomcat9
+
+```
+# using system administrator cmd to set CATALINA_HOME environment variable
+$ setx /M CATALINA_HOME "D:\Tomcat9.0"
+```
+
+- Add D:\Tomcat9\bin to Path environment variable 
+
+```
+# using system administrator cmd to add path to Path environment variable
+$ setx /M Path "%CATALINA_HOME%\bin;%Path%"
+```
+
+- Verify Tomcat install by executing startup.bat, if execute successfully, the Tomcat window would remain opening until execute shutdown.bat to close Tomcat
+
+```
+# using cmd to start Tomcat
+$ startup.bat
+
+# using cmd to close Tomcat
+$ shutdown.bat
+```
+
+- if you can see the [home page](http://localhost:8080) of your Apache Tomcat Server, it means your Apache Tomcat Server executes normally 
+
+### Config
+
+- If you encounter port conflict, or you just want to change the tomcat listening port
+
+```
+# edit the D:\Tomcat9\conf\server.xml and change the port setting
+<Connector port="8080" protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           redirectPort="8443" />
+```
+
+- Install, Uninstall Tomcat to Windows Service
+
+```
+# install the Apache Tomcat Server to Windows service
+$ service.bat install "MyServiceName"
+
+# uninstall the Apache Tomcat Server service
+$ service.bat uninstall "MyServiceName"
+```
+
+- Start and Stop the Windows Service
+
+```
+# using system administrator cmd
+
+# start service
+$ net start MyServiceName
+
+# stop service
+$ net stop MyServiceName
+```
 
